@@ -31,7 +31,7 @@ class IMCDataset(Dataset):
             augment_fn (callable, optional): augments images with pre-defined visual effects.
         """
         super().__init__()
-    # self.root_dir = root_dir
+        # self.root_dir = root_dir
         self.mode = mode
 
         # prepare scene_info and pair_info
