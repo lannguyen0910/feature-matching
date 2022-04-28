@@ -90,6 +90,13 @@ def pad_bottom_right(inp, pad_size, ret_mask=False):
 
 
 # --- MEGADEPTH ---
+def read_megadepth_depth(path, pad_to=None):
+    depth = cv2.imread(path, 0)
+    if pad_to is not None:
+        depth, _ = pad_bottom_right(depth, pad_to, ret_mask=False)
+    depth = torch.from_numpy(depth).float()  # (h, w)
+
+    return depth
 
 def read_megadepth_gray(path, resize=None, df=None, padding=False, augment_fn=None):
     """
