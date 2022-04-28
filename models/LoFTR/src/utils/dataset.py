@@ -16,6 +16,7 @@ except Exception:
 
 # --- DATA IO ---
 
+
 def load_array_from_s3(
     path, client, cv_type,
     use_h5py=False,
@@ -38,7 +39,7 @@ def load_array_from_s3(
 
 def imread_gray(path, augment_fn=None, client=SCANNET_CLIENT):
     cv_type = cv2.IMREAD_GRAYSCALE if augment_fn is None \
-                else cv2.IMREAD_COLOR
+        else cv2.IMREAD_COLOR
     if str(path).startswith('s3://'):
         image = load_array_from_s3(str(path), client, cv_type)
     else:
@@ -70,7 +71,8 @@ def get_divisible_wh(w, h, df=None):
 
 
 def pad_bottom_right(inp, pad_size, ret_mask=False):
-    assert isinstance(pad_size, int) and pad_size >= max(inp.shape[-2:]), f"{pad_size} < {max(inp.shape[-2:])}"
+    assert isinstance(pad_size, int) and pad_size >= max(
+        inp.shape[-2:]), f"{pad_size} < {max(inp.shape[-2:])}"
     mask = None
     if inp.ndim == 2:
         padded = np.zeros((pad_size, pad_size), dtype=inp.dtype)
@@ -97,6 +99,7 @@ def read_megadepth_depth(path, pad_to=None):
     depth = torch.from_numpy(depth).float()  # (h, w)
 
     return depth
+
 
 def read_megadepth_gray(path, resize=None, df=None, padding=False, augment_fn=None):
     """
@@ -126,67 +129,8 @@ def read_megadepth_gray(path, resize=None, df=None, padding=False, augment_fn=No
     else:
         mask = None
 
-    image = torch.from_numpy(image).float()[None] / 255  # (h, w) -> (1, h, w) and normalized
+    # (h, w) -> (1, h, w) and normalized
+    image = torch.from_numpy(image).float()[None] / 255
     mask = torch.from_numpy(mask)
 
     return image, mask, scale
-
-
-def read_megadepth_depth(path, pad_to=None):
-    if str(path).startswith('s3://'):
-        depth = load_array_from_s3(path, MEGADEPTH_CLIENT, None, use_h5py=True)
-    else:
-        depth = np.array(h5py.File(path, 'r')['depth'])
-    if pad_to is not None:
-        depth, _ = pad_bottom_right(depth, pad_to, ret_mask=False)
-    depth = torch.from_numpy(depth).float()  # (h, w)
-    return depth
-
-
-# --- ScanNet ---
-
-def read_scannet_gray(path, resize=(640, 480), augment_fn=None):
-    """
-    Args:
-        resize (tuple): align image to depthmap, in (w, h).
-        augment_fn (callable, optional): augments images with pre-defined visual effects
-    Returns:
-        image (torch.tensor): (1, h, w)
-        mask (torch.tensor): (h, w)
-        scale (torch.tensor): [w/w_new, h/h_new]        
-    """
-    # read and resize image
-    image = imread_gray(path, augment_fn)
-    image = cv2.resize(image, resize)
-
-    # (h, w) -> (1, h, w) and normalized
-    image = torch.from_numpy(image).float()[None] / 255
-    return image
-
-
-def read_scannet_depth(path):
-    if str(path).startswith('s3://'):
-        depth = load_array_from_s3(str(path), SCANNET_CLIENT, cv2.IMREAD_UNCHANGED)
-    else:
-        depth = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
-    depth = depth / 1000
-    depth = torch.from_numpy(depth).float()  # (h, w)
-    return depth
-
-
-def read_scannet_pose(path):
-    """ Read ScanNet's Camera2World pose and transform it to World2Camera.
-    
-    Returns:
-        pose_w2c (np.ndarray): (4, 4)
-    """
-    cam2world = np.loadtxt(path, delimiter=' ')
-    world2cam = inv(cam2world)
-    return world2cam
-
-
-def read_scannet_intrinsic(path):
-    """ Read ScanNet's intrinsic matrix and return the 3x3 matrix.
-    """
-    intrinsic = np.loadtxt(path, delimiter=' ')
-    return intrinsic[:-1, :-1]

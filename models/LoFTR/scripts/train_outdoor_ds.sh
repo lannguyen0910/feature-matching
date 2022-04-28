@@ -14,7 +14,7 @@ data_cfg_path="configs/data/megadepth_trainval_${TRAIN_IMG_SIZE}.py"
 main_cfg_path="configs/loftr/outdoor/loftr_ds_dense.py"
 
 n_nodes=1
-n_gpus_per_node=4
+n_gpus_per_node=1
 torch_num_workers=4
 batch_size=1
 pin_memory=true
