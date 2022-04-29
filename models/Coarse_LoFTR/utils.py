@@ -76,3 +76,14 @@ def ratio_preserving_resize(image, img_size):
     y = new_size[1] // 2 - img_size[1] // 2
     image = image[y:y + img_size[1], x:x + img_size[0]]
     return image
+
+def draw_features(image, features, img_size, color, draw_text=True):
+    indices = range(len(features))
+    sx = image.shape[1] / img_size[0]
+    sy = image.shape[0] / img_size[1]
+
+    for i, point in zip(indices, features):
+        point_int = (int(round(point[0] * sx)), int(round(point[1] * sy)))
+        cv2.circle(image, point_int, 2, color, -1, lineType=16)
+        if draw_text:
+            cv2.putText(image, str(i), point_int, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1, cv2.LINE_AA)

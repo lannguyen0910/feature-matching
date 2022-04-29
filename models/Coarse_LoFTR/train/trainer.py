@@ -1,19 +1,16 @@
 import os
-
 import cv2
-from tqdm import tqdm
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
-from torch.utils.tensorboard import SummaryWriter
 import torch.nn.functional as torch_func
 
+from tqdm import tqdm
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 from train.mvsdataset import MVSDataset
 from train.saveutils import load_last_checkpoint, save_checkpoint
-from utils import get_coarse_match
 from loftr import LoFTR, default_cfg
-from utils import make_student_config
-from webcam import draw_features
+from ..utils import get_coarse_match, make_student_config, draw_features
 
 
 def tensor_to_image(image):
@@ -35,7 +32,8 @@ class Trainer(object):
             sub_path = 'no-teacher'
             if self.settings.with_teacher:
                 sub_path = 'teacher'
-            self.summary_writer = SummaryWriter(log_dir=os.path.join(checkpoint_path, sub_path))
+            self.summary_writer = SummaryWriter(
+                log_dir=os.path.join(checkpoint_path, sub_path))
         self.optimizer = None
 
         self.global_train_index = 0
@@ -44,11 +42,14 @@ class Trainer(object):
         self.last_teacher_conf_matrix = None
         self.last_student_conf_matrix = None
 
-        print(f'Trainer is initialized with batch size = {self.settings.batch_size}')
-        print(f'Gradient accumulation batch size divider = {self.settings.batch_size_divider}')
+        print(
+            f'Trainer is initialized with batch size = {self.settings.batch_size}')
+        print(
+            f'Gradient accumulation batch size divider = {self.settings.batch_size_divider}')
         print(f'Automatic Mixed Precision = {self.settings.use_amp}')
 
-        self.scaler = torch.cuda.amp.GradScaler(init_scale=self.settings.amp_scale)
+        self.scaler = torch.cuda.amp.GradScaler(
+            init_scale=self.settings.amp_scale)
 
         real_batch_size = self.settings.batch_size // self.settings.batch_size_divider
 
@@ -57,7 +58,8 @@ class Trainer(object):
         self.teacher_model = LoFTR(config=self.teacher_cfg)
         checkpoint = torch.load(weights_path)
         if checkpoint is not None:
-            missed_keys, unexpected_keys = self.teacher_model.load_state_dict(checkpoint['state_dict'], strict=False)
+            missed_keys, unexpected_keys = self.teacher_model.load_state_dict(
+                checkpoint['state_dict'], strict=False)
             if len(missed_keys) > 0:
                 print('Checkpoint is broken')
                 exit(1)
@@ -79,7 +81,8 @@ class Trainer(object):
         # setup dataset
         batch_size = self.settings.batch_size // self.settings.batch_size_divider
         self.train_dataset = MVSDataset(dataset_path,
-                                        (self.student_cfg['input_width'], self.student_cfg['input_height']),
+                                        (self.student_cfg['input_width'],
+                                         self.student_cfg['input_height']),
                                         self.student_cfg['resolution'][0],
                                         depth_tolerance=self.settings.depth_tolerance,
                                         epoch_size=self.settings.epoch_size)
@@ -94,9 +97,11 @@ class Trainer(object):
                           teacher_config,
                           student_conf_matrix,
                           student_config):
-        assert (teacher_config['input_height'] == student_config['input_height'])
+        assert (teacher_config['input_height'] ==
+                student_config['input_height'])
         assert (teacher_config['input_width'] == student_config['input_width'])
-        img_size = (teacher_config['input_width'], teacher_config['input_height'])
+        img_size = (teacher_config['input_width'],
+                    teacher_config['input_height'])
         image1 = tensor_to_image(image1)
         image2 = tensor_to_image(image2)
 
@@ -115,8 +120,10 @@ class Trainer(object):
             draw_features(image2, mkpts1, img_size, color)
 
         if self.settings.with_teacher:
-            draw_feature_points(teacher_conf_matrix[0, :, :].unsqueeze(0), teacher_config, (255, 255, 255))
-        draw_feature_points(student_conf_matrix[0, :, :].unsqueeze(0), student_config, (0, 0, 0))
+            draw_feature_points(teacher_conf_matrix[0, :, :].unsqueeze(
+                0), teacher_config, (255, 255, 255))
+        draw_feature_points(student_conf_matrix[0, :, :].unsqueeze(
+            0), student_config, (0, 0, 0))
 
         # combine images
         res_img = np.hstack((image1, image2))
@@ -126,14 +133,21 @@ class Trainer(object):
                                       self.global_train_index)
 
     def train_loop(self):
-        train_teacher_mae = torch.tensor(0., device='cuda' if self.settings.cuda else 'cpu')
-        train_student_mae = torch.tensor(0., device='cuda' if self.settings.cuda else 'cpu')
+        train_teacher_mae = torch.tensor(
+            0., device='cuda' if self.settings.cuda else 'cpu')
+        train_student_mae = torch.tensor(
+            0., device='cuda' if self.settings.cuda else 'cpu')
 
-        train_teacher_loss = torch.tensor(0., device='cuda' if self.settings.cuda else 'cpu')
-        train_student_loss = torch.tensor(0., device='cuda' if self.settings.cuda else 'cpu')
-        train_distill_loss = torch.tensor(0., device='cuda' if self.settings.cuda else 'cpu')
-        train_total_loss = torch.tensor(0., device='cuda' if self.settings.cuda else 'cpu')
-        divider = torch.tensor(self.settings.batch_size_divider, device='cuda' if self.settings.cuda else 'cpu')
+        train_teacher_loss = torch.tensor(
+            0., device='cuda' if self.settings.cuda else 'cpu')
+        train_student_loss = torch.tensor(
+            0., device='cuda' if self.settings.cuda else 'cpu')
+        train_distill_loss = torch.tensor(
+            0., device='cuda' if self.settings.cuda else 'cpu')
+        train_total_loss = torch.tensor(
+            0., device='cuda' if self.settings.cuda else 'cpu')
+        divider = torch.tensor(self.settings.batch_size_divider,
+                               device='cuda' if self.settings.cuda else 'cpu')
         real_batch_index = 0
         progress_bar = tqdm(self.train_dataloader)
         torch.autograd.set_detect_anomaly(True)
@@ -141,7 +155,8 @@ class Trainer(object):
             with torch.set_grad_enabled(True):
                 if self.settings.use_amp:
                     with torch.cuda.amp.autocast():
-                        losses, teacher_loss, student_mae, teacher_mae = self.train_loss_fn(*batch)
+                        losses, teacher_loss, student_mae, teacher_mae = self.train_loss_fn(
+                            *batch)
                         # normalize loss to account for batch accumulation
                         for loss in losses:
                             loss /= divider
@@ -154,7 +169,8 @@ class Trainer(object):
                     self.scaler.scale(loss).backward()
                     train_total_loss += loss.detach()
                 else:
-                    losses, teacher_loss, student_mae, teacher_mae = self.train_loss_fn(*batch)
+                    losses, teacher_loss, student_mae, teacher_mae = self.train_loss_fn(
+                        *batch)
                     # normalize loss to account for batch accumulation
                     for loss in losses:
                         loss /= divider
@@ -188,7 +204,8 @@ class Trainer(object):
                         self.write_batch_statistics(real_batch_index)
 
                     if (real_batch_index + 1) % self.settings.statistics_period == 0:
-                        cur_lr = [group['lr'] for group in self.optimizer.param_groups]
+                        cur_lr = [group['lr']
+                                  for group in self.optimizer.param_groups]
                         progress_bar.set_postfix(
                             {'Teacher loss': current_teacher_loss.item(),
                              'Total loss': current_total_loss.item(),
@@ -233,13 +250,15 @@ class Trainer(object):
         fake_input = torch.ones(img_size, dtype=torch.float32)
         if self.settings.cuda:
             fake_input = fake_input.cuda()
-        self.summary_writer.add_graph(self.student_model, [fake_input, fake_input])
+        self.summary_writer.add_graph(
+            self.student_model, [fake_input, fake_input])
         self.summary_writer.flush()
 
     def train(self, name):
         # continue training starting from the latest epoch checkpoint
         start_epoch = 0
-        prev_epoch = load_last_checkpoint(self.checkpoint_path, self.student_model, self.optimizer, self.scaler)
+        prev_epoch = load_last_checkpoint(
+            self.checkpoint_path, self.student_model, self.optimizer, self.scaler)
 
         if prev_epoch >= 0:
             start_epoch = prev_epoch + 1
@@ -261,9 +280,11 @@ class Trainer(object):
             print(f"Teacher MAE:{teacher_mae:7f} \n")
             if self.settings.write_statistics:
                 self.summary_writer.add_scalar('Loss/train', train_loss, epoch)
-                self.summary_writer.add_scalar('Student MAE', student_mae, epoch)
+                self.summary_writer.add_scalar(
+                    'Student MAE', student_mae, epoch)
 
-            save_checkpoint(name, epoch, self.student_model, self.optimizer, self.scaler, self.checkpoint_path)
+            save_checkpoint(name, epoch, self.student_model,
+                            self.optimizer, self.scaler, self.checkpoint_path)
             self.train_dataset.reset_epoch()
             scheduler.step()
 
@@ -293,23 +314,33 @@ class Trainer(object):
             image2 = image2.cuda()
             conf_matrix_gt = conf_matrix_gt.cuda()
 
-        student_conf_matrix, student_sim_matrix = self.student_model.forward(image1, image2)
+        student_conf_matrix, student_sim_matrix = self.student_model.forward(
+            image1, image2)
         student_mae = torch.mean(conf_matrix_gt - student_conf_matrix)
 
         if self.settings.with_teacher:
             with torch.no_grad():
-                teacher_conf_matrix, teacher_sim_matrix = self.teacher_model.forward(image1, image2)
+                teacher_conf_matrix, teacher_sim_matrix = self.teacher_model.forward(
+                    image1, image2)
             scale = self.student_cfg['resolution'][0] // self.teacher_cfg['resolution'][0]
-            i_ids = torch.arange(start=0, end=student_conf_matrix.shape[1], device=student_conf_matrix.device) * scale
-            j_ids = torch.arange(start=0, end=student_conf_matrix.shape[2], device=student_conf_matrix.device) * scale
+            i_ids = torch.arange(
+                start=0, end=student_conf_matrix.shape[1], device=student_conf_matrix.device) * scale
+            j_ids = torch.arange(
+                start=0, end=student_conf_matrix.shape[2], device=student_conf_matrix.device) * scale
 
-            teacher_conf_matrix_scaled = torch.index_select(teacher_conf_matrix, 1, i_ids)
-            teacher_conf_matrix_scaled = torch.index_select(teacher_conf_matrix_scaled, 2, j_ids)
-            teacher_mae = torch.mean(conf_matrix_gt - teacher_conf_matrix_scaled)
-            teacher_loss = self.conf_cross_entropy_loss(conf_matrix_gt, teacher_conf_matrix_scaled)
+            teacher_conf_matrix_scaled = torch.index_select(
+                teacher_conf_matrix, 1, i_ids)
+            teacher_conf_matrix_scaled = torch.index_select(
+                teacher_conf_matrix_scaled, 2, j_ids)
+            teacher_mae = torch.mean(
+                conf_matrix_gt - teacher_conf_matrix_scaled)
+            teacher_loss = self.conf_cross_entropy_loss(
+                conf_matrix_gt, teacher_conf_matrix_scaled)
 
-            teacher_sim_matrix = torch.index_select(teacher_sim_matrix, 1, i_ids)
-            teacher_sim_matrix = torch.index_select(teacher_sim_matrix, 2, j_ids)
+            teacher_sim_matrix = torch.index_select(
+                teacher_sim_matrix, 1, i_ids)
+            teacher_sim_matrix = torch.index_select(
+                teacher_sim_matrix, 2, j_ids)
 
             # compute distillation loss
             soft_log_probs = torch_func.log_softmax(
@@ -325,7 +356,8 @@ class Trainer(object):
             distillation_loss *= self.settings.distill_ampl_coeff
 
         # compute student loss - cross entropy
-        student_loss = self.conf_cross_entropy_loss(conf_matrix_gt, student_conf_matrix)
+        student_loss = self.conf_cross_entropy_loss(
+            conf_matrix_gt, student_conf_matrix)
 
         if self.settings.write_statistics:
             self.last_image1 = image1
@@ -347,5 +379,6 @@ class Trainer(object):
         conf = torch.clamp(conf_matrix, 1e-6, 1 - 1e-6)
         loss_pos = - torch.log(conf[pos_mask])
         loss_neg = - torch.log(1 - conf[neg_mask])
-        loss_value = (loss_pos.mean() if loss_pos.numel() > 0 else 0) + loss_neg.mean()
+        loss_value = (loss_pos.mean() if loss_pos.numel()
+                      > 0 else 0) + loss_neg.mean()
         return loss_value
