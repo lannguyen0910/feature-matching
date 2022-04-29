@@ -1,14 +1,11 @@
 from configs.data.base import cfg
 
 
-cfg.DATASET.TRAIN_DATA_ROOT = "data/megadepth/train"
 cfg.DATASET.MIN_OVERLAP_SCORE_TRAIN = 0.0
 
 cfg.DATASET.DEPTH0_PATH = "depth-masks-imc2022/depth_maps/"
 cfg.DATASET.DEPTH1_PATH = "depth-masks-imc2022/depth_maps/"
 
-cfg.DATASET.TEST_DATA_SOURCE = "MegaDepth"
-cfg.DATASET.VAL_DATA_ROOT = cfg.DATASET.TEST_DATA_ROOT = "data/megadepth/test"
 cfg.DATASET.MIN_OVERLAP_SCORE_TEST = 0.0   # for both test and val
 
 # 368 scenes in total for MegaDepth

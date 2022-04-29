@@ -19,11 +19,11 @@ class MultiSceneDataModule(pl.LightningDataModule):
 
         # 1. data config
         # training and validating
-        self.train_data_root = config.DATASET.TRAIN_DATA_ROOT
-        self.val_data_root = config.DATASET.VAL_DATA_ROOT
+        self.train_data_root = data_df[:1000000]
+        self.val_data_root = data_df[1000000:]
 
         # testing
-        self.test_data_root = config.DATASET.TEST_DATA_ROOT
+        self.test_data_root = data_df[1000000:]
 
         # 2. dataset config
         # general options
@@ -134,17 +134,13 @@ class MultiSceneDataModule(pl.LightningDataModule):
 
     def train_dataloader(self):
         """ Build training dataloader for IMC dataset. """
-
-        dataloader = DataLoader(
+        return DataLoader(
             self.train_dataset, drop_last=True, **self.train_loader_params)
-        return dataloader
 
     def val_dataloader(self):
         """ Build validation dataloader for IMC dataset. """
-
-        dataloaders = DataLoader(
+        return DataLoader(
             self.val_dataset, drop_last=True, **self.val_loader_params)
-        return dataloaders
 
     def test_dataloader(self, *args, **kwargs):
         return DataLoader(self.test_dataset, **self.test_loader_params)

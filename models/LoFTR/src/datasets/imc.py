@@ -1,6 +1,9 @@
 import os
 from torch.utils.data import Dataset
 from loguru import logger
+import numpy as np
+import torch
+import torch.nn.functional as F
 
 from src.utils.dataset import read_megadepth_gray, read_megadepth_depth
 
@@ -18,7 +21,7 @@ class IMCDataset(Dataset):
                  **kwargs):
         """
         Args:
-            root_dir (str): megadepth root directory that has `phoenix`.
+            data (pd.DataFrame): IMC train.csv.
             mode (str): options are ['train', 'val', 'test']
             min_overlap_score (float): how much a pair should have in common. In range of [0, 1]. Set to 0 when testing.
             img_resize (int, optional): the longer edge of resized images. None for no resize. 640 is recommended.
@@ -78,9 +81,9 @@ class IMCDataset(Dataset):
             img_name1, self.img_resize, self.df, self.img_padding, None)
         # np.random.choice([self.augment_fn, None], p=[0.5, 0.5]))
         depth_path0 = os.path.join(self.depth0_base_path,
-            img_name0.split("/")[-3], img_name0.split("/")[-1])
+                                   img_name0.split("/")[-3], img_name0.split("/")[-1])
         depth_path1 = os.path.join(self.depth1_base_path,
-            img_name1.split("/")[-3], img_name1.split("/")[-1])
+                                   img_name1.split("/")[-3], img_name1.split("/")[-1])
 
         # read depth. shape: (h, w)
         if self.mode in ['train', 'val']:
