@@ -1,14 +1,14 @@
-from torch.utils.data import Dataset
 import torch
 import itertools
 import os
-from pathlib import Path
-from numpy.random import default_rng
 import cv2
 import numpy as np
 import re
 
-from utils import make_query_image, ratio_preserving_resize
+from pathlib import Path
+from torch.utils.data import Dataset
+from numpy.random import default_rng
+from utils.utils import make_query_image, ratio_preserving_resize
 
 
 # Dataset parsing routines were taken from https://github.com/YoYo000/MVSNet/

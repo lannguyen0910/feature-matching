@@ -1,6 +1,6 @@
 import os
-from pathlib import Path
 import torch
+from pathlib import Path
 
 
 def load_checkpoint_for_inference(filename, model, ignore_missed=False):

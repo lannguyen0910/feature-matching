@@ -2,9 +2,9 @@ import torch
 import torch.nn as nn
 
 from .backbone import build_backbone
-from .utils.position_encoding import PositionEncodingSine
+from utils.position_encoding import PositionEncodingSine
 from .loftr_module import LocalFeatureTransformer
-from .utils.coarse_matching import CoarseMatching
+from utils.coarse_matching import CoarseMatching
 
 
 class LoFTR(nn.Module):

@@ -1,7 +1,7 @@
 from copy import deepcopy
 from loftr import LoFTR
 from loftr.utils.cvpr_ds_config import default_cfg
-from utils import make_student_config
+from utils.utils import make_student_config
 
 
 def print_model_size(model):
