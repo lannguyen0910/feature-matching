@@ -7,7 +7,7 @@ import torch.nn.functional as torch_func
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from datasets.mvsdataset import MVSDataset
+from datasets.imc import IMCDataset
 from loftr import LoFTR, default_cfg
 from utils.checkpoint import load_last_checkpoint, save_checkpoint
 from utils.utils import get_coarse_match, make_student_config, draw_features
@@ -80,7 +80,7 @@ class Trainer(object):
 
         # setup dataset
         batch_size = self.settings.batch_size // self.settings.batch_size_divider
-        self.train_dataset = MVSDataset(dataset_path,
+        self.train_dataset = IMCDataset(dataset_path,
                                         (self.student_cfg['input_width'],
                                          self.student_cfg['input_height']),
                                         self.student_cfg['resolution'][0],

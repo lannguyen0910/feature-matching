@@ -6,7 +6,7 @@ class BaseConfig:
         self.batch_size_divider = 8  # Used for gradient accumulation
         self.use_amp = True
         self.epochs = 50
-        self.epoch_size = 5000
+        self.epoch_size = 0
         # used for identification of correspondent points in dataset image pairs
         self.depth_tolerance = 0.005
 
