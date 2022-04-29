@@ -1,6 +1,6 @@
 import argparse
-from train.trainer import Trainer
-from train.settings import TrainSettings
+from trainer.trainer import Trainer
+from configs.config import BaseConfig
 
 
 def main():
@@ -16,8 +16,8 @@ def main():
     opt = parser.parse_args()
     print(opt)
 
-    settings = TrainSettings()
-    trainer = Trainer(settings, opt.weights, opt.path, opt.checkpoint_path)
+    config = BaseConfig()
+    trainer = Trainer(config, opt.weights, opt.path, opt.checkpoint_path)
     trainer.train('LoFTR')
 
 

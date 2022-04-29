@@ -1,4 +1,4 @@
-class TrainSettings:
+class BaseConfig:
     def __init__(self):
         self.cuda = True
 
