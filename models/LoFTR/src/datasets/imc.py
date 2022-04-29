@@ -1,6 +1,4 @@
-import numpy as np
-import torch
-import torch.nn.functional as F
+import os
 from torch.utils.data import Dataset
 from loguru import logger
 
@@ -51,7 +49,10 @@ class IMCDataset(Dataset):
 
         # for training LoFTR
         self.augment_fn = augment_fn if mode == 'train' else None
-        self.coarse_scale = getattr(kwargs, 'coarse_scale', 0.125)
+        self.coarse_scale = getattr(kwargs, 'coarse_scale')
+        self.depth0_base_path = getattr(kwargs, 'depth0_base_path')
+        self.depth1_base_path = getattr(kwargs, 'depth0_base_path')
+
         self.path1 = data["path1"].values
         self.path2 = data["path2"].values
         self.camerainst1 = data["camerainst1"].values
@@ -76,10 +77,10 @@ class IMCDataset(Dataset):
         image1, mask1, scale1 = read_megadepth_gray(
             img_name1, self.img_resize, self.df, self.img_padding, None)
         # np.random.choice([self.augment_fn, None], p=[0.5, 0.5]))
-        depth_path0 = "../input/depth-masks-imc2022/depth_maps/" + \
-            img_name0.split("/")[-3] + '/' + img_name0.split("/")[-1]
-        depth_path1 = "../input/depth-masks-imc2022/depth_maps/" + \
-            img_name1.split("/")[-3] + '/' + img_name1.split("/")[-1]
+        depth_path0 = os.path.join(self.depth0_base_path,
+            img_name0.split("/")[-3], img_name0.split("/")[-1])
+        depth_path1 = os.path.join(self.depth1_base_path,
+            img_name1.split("/")[-3], img_name1.split("/")[-1])
 
         # read depth. shape: (h, w)
         if self.mode in ['train', 'val']:

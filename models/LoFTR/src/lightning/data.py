@@ -14,7 +14,7 @@ from src.datasets.imc import IMCDataset
 
 
 class MultiSceneDataModule(pl.LightningDataModule):
-    def __init__(self, args, config):
+    def __init__(self, args, config, data_df):
         super().__init__()
 
         # 1. data config
@@ -40,6 +40,8 @@ class MultiSceneDataModule(pl.LightningDataModule):
         self.mgdpt_df = config.DATASET.MGDPT_DF  # 8
         # 0.125. for training loftr.
         self.coarse_scale = 1 / config.LOFTR.RESOLUTION[0]
+        self.depth0_base_path = config.DATASET.DEPTH0_PATH
+        self.depth1_base_path = config.DATASET.DEPTH1_PATH
 
         # 3.loader parameters
         self.train_loader_params = {
@@ -124,7 +126,9 @@ class MultiSceneDataModule(pl.LightningDataModule):
                        img_padding=self.mgdpt_img_pad,
                        depth_padding=self.mgdpt_depth_pad,
                        augment_fn=augment_fn,
-                       coarse_scale=self.coarse_scale))
+                       coarse_scale=self.coarse_scale,
+                       depth0_base_path=self.depth0_base_path,
+                       depth1_base_path=self.depth1_base_path))
 
         return ConcatDataset(datasets)
 

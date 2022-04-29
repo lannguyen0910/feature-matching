@@ -105,6 +105,9 @@ _CN.DATASET.MGDPT_IMG_RESIZE = 640
 _CN.DATASET.MGDPT_IMG_PAD = True  # pad img to square with size = MGDPT_IMG_RESIZE
 _CN.DATASET.MGDPT_DEPTH_PAD = True  # pad depthmap to square with size = 2000
 _CN.DATASET.MGDPT_DF = 8
+_CN.DATASET.DEPTH0_PATH = None
+_CN.DATASET.DEPTH1_PATH = None
+
 
 ##############  Trainer  ##############
 _CN.TRAINER = CN()
