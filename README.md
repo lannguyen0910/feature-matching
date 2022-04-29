@@ -1,7 +1,11 @@
 # Kaggle Image Matching Challenge 2022
 
-## Acknowledgements
+## Acknowledgements (Remember to cite paper + code)
+Adapted and modified from:  
 - LoFTR: https://github.com/zju3dv/LoFTR.
-- SuperGlue: https://github.com/magicleap/SuperGluePretrainedNetwork.
+- Coarse LoFTR: https://github.com/Kolkir/Coarse_LoFTR_TRT
 - Patch2pix: https://github.com/GrumpyZhou/patch2pix.
 - COTR: https://github.com/ubc-vision/COTR.
+
+References:
+- SuperGlue: https://github.com/magicleap/SuperGluePretrainedNetwork.
