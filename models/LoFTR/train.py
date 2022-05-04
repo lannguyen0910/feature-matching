@@ -112,15 +112,10 @@ def main():
     # Lightning Trainer
     trainer = pl.Trainer.from_argparse_args(
         args,
-        plugins=DDPPlugin(find_unused_parameters=False,
-                          num_nodes=args.num_nodes,
-                          sync_batchnorm=config.TRAINER.WORLD_SIZE > 0),
         gradient_clip_val=config.TRAINER.GRADIENT_CLIPPING,
         callbacks=callbacks,
         logger=logger,
-        sync_batchnorm=config.TRAINER.WORLD_SIZE > 0,
         replace_sampler_ddp=False,  # use custom sampler
-        reload_dataloaders_every_epoch=False,  # avoid repeated samples!
         weights_summary='full',
         profiler=profiler)
     loguru_logger.info(f"Trainer initialized!")

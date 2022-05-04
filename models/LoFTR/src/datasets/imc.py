@@ -52,9 +52,9 @@ class IMCDataset(Dataset):
 
         # for training LoFTR
         self.augment_fn = augment_fn if mode == 'train' else None
-        self.coarse_scale = getattr(kwargs, 'coarse_scale')
-        self.depth0_base_path = getattr(kwargs, 'depth0_base_path')
-        self.depth1_base_path = getattr(kwargs, 'depth0_base_path')
+        self.coarse_scale = kwargs['coarse_scale']
+        self.depth0_base_path = kwargs['depth0_base_path']
+        self.depth1_base_path = kwargs['depth1_base_path']
 
         self.path1 = data["path1"].values
         self.path2 = data["path2"].values

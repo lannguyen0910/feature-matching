@@ -70,14 +70,10 @@ class MultiSceneDataModule(pl.LightningDataModule):
         """
 
         assert stage in ['fit', 'test'], "stage must be either fit or test"
-        try:
-            self.world_size = dist.get_world_size()
-            self.rank = dist.get_rank()
-            logger.info(f"[rank:{self.rank}] world_size: {self.world_size}")
-        except AssertionError as ae:
-            self.world_size = 1
-            self.rank = 0
-            logger.warning(str(ae) + " (set wolrd_size=1 and rank=0)")
+
+        self.world_size = 1
+        self.rank = 0
+        logger.info("Set wolrd_size=1 and rank=0")
 
         if stage == 'fit':
             self.train_dataset = self._setup_dataset(
