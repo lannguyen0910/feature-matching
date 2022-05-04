@@ -1,6 +1,8 @@
 import math
 import argparse
 import pprint
+import pandas as pd
+
 from distutils.util import strtobool
 from pathlib import Path
 from loguru import logger as loguru_logger
@@ -23,7 +25,8 @@ loguru_logger = get_rank_zero_only_logger(loguru_logger)
 def parse_args():
     # init a costum parser which will be added into pl.Trainer parser
     # check documentation: https://pytorch-lightning.readthedocs.io/en/latest/common/trainer.html#trainer-flags
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         'data_cfg_path', type=str, help='data config path')
     parser.add_argument(
@@ -40,6 +43,9 @@ def parse_args():
     parser.add_argument(
         '--ckpt_path', type=str, default=None,
         help='pretrained checkpoint path, helpful for using a pre-trained coarse-only LoFTR')
+    parser.add_argument(
+        '--train_csv', type=str, default=None,
+        help='CSV data for training')
     parser.add_argument(
         '--disable_ckpt', action='store_true',
         help='disable checkpoint saving (useful for debugging).')
@@ -66,7 +72,7 @@ def main():
     pl.seed_everything(config.TRAINER.SEED)  # reproducibility
     # TODO: Use different seeds for each dataloader workers
     # This is needed for data augmentation
-    
+
     # scale lr and warmup-step automatically
     args.gpus = _n_gpus = setup_gpus(args.gpus)
     config.TRAINER.WORLD_SIZE = _n_gpus * args.num_nodes
@@ -74,21 +80,24 @@ def main():
     _scaling = config.TRAINER.TRUE_BATCH_SIZE / config.TRAINER.CANONICAL_BS
     config.TRAINER.SCALING = _scaling
     config.TRAINER.TRUE_LR = config.TRAINER.CANONICAL_LR * _scaling
-    config.TRAINER.WARMUP_STEP = math.floor(config.TRAINER.WARMUP_STEP / _scaling)
-    
+    config.TRAINER.WARMUP_STEP = math.floor(
+        config.TRAINER.WARMUP_STEP / _scaling)
+
     # lightning module
     profiler = build_profiler(args.profiler_name)
     model = PL_LoFTR(config, pretrained_ckpt=args.ckpt_path, profiler=profiler)
     loguru_logger.info(f"LoFTR LightningModule initialized!")
-    
+
     # lightning data
-    data_module = MultiSceneDataModule(args, config)
+    data = pd.read_csv("../input/imc-gt/train.csv")
+    data_module = MultiSceneDataModule(args, config, data)
     loguru_logger.info(f"LoFTR DataModule initialized!")
-    
+
     # TensorBoard Logger
-    logger = TensorBoardLogger(save_dir='logs/tb_logs', name=args.exp_name, default_hp_metric=False)
+    logger = TensorBoardLogger(
+        save_dir='logs/tb_logs', name=args.exp_name, default_hp_metric=False)
     ckpt_dir = Path(logger.log_dir) / 'checkpoints'
-    
+
     # Callbacks
     # TODO: update ModelCheckpoint to monitor multiple metrics
     ckpt_callback = ModelCheckpoint(monitor='auc@10', verbose=True, save_top_k=5, mode='max',
@@ -99,7 +108,7 @@ def main():
     callbacks = [lr_monitor]
     if not args.disable_ckpt:
         callbacks.append(ckpt_callback)
-    
+
     # Lightning Trainer
     trainer = pl.Trainer.from_argparse_args(
         args,

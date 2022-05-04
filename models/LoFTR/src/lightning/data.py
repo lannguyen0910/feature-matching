@@ -20,10 +20,10 @@ class MultiSceneDataModule(pl.LightningDataModule):
         # 1. data config
         # training and validating
         self.train_data_root = data_df[:1000000]
-        self.val_data_root = data_df[1000000:]
+        self.val_data_root = data_df[1000000:1200000]
 
         # testing
-        self.test_data_root = data_df[1000000:]
+        self.test_data_root = data_df[1200000:]
 
         # 2. dataset config
         # general options
