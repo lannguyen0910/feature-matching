@@ -89,7 +89,7 @@ def main():
     loguru_logger.info(f"LoFTR LightningModule initialized!")
 
     # lightning data
-    data = pd.read_csv("../input/imc-gt/train.csv")
+    data = pd.read_csv(args.train_csv)
     data_module = MultiSceneDataModule(args, config, data)
     loguru_logger.info(f"LoFTR DataModule initialized!")
 
