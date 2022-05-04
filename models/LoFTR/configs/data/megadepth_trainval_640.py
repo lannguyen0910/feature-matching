@@ -3,8 +3,8 @@ from configs.data.base import cfg
 
 cfg.DATASET.MIN_OVERLAP_SCORE_TRAIN = 0.0
 
-cfg.DATASET.DEPTH0_PATH = "depth-masks-imc2022/depth_maps/"
-cfg.DATASET.DEPTH1_PATH = "depth-masks-imc2022/depth_maps/"
+cfg.DATASET.DEPTH0_PATH = "/content/data/depth_maps/"
+cfg.DATASET.DEPTH1_PATH = "/content/data/depth_maps/"
 
 cfg.DATASET.MIN_OVERLAP_SCORE_TEST = 0.0   # for both test and val
 

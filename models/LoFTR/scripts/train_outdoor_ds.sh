@@ -1,11 +1,11 @@
 #!/bin/bash -l
 
-SCRIPTPATH=$(dirname $(readlink -f "$0"))
-PROJECT_DIR="${SCRIPTPATH}/../../"
+# SCRIPTPATH=$(dirname $(readlink -f "$0"))
+# PROJECT_DIR="${SCRIPTPATH}/../../"
 
-# conda activate loftr
-export PYTHONPATH=$PROJECT_DIR:$PYTHONPATH
-cd $PROJECT_DIR
+# # conda activate loftr
+# export PYTHONPATH=$PROJECT_DIR:$PYTHONPATH
+# cd $PROJECT_DIR
 
 TRAIN_IMG_SIZE=640
 # to reproduced the results in our paper, please use:
