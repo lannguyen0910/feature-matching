@@ -17,7 +17,7 @@ train_path="/content/data/train.csv"
 
 n_nodes=1
 n_gpus_per_node=1
-torch_num_workers=4
+torch_num_workers=2
 batch_size=1
 pin_memory=true
 exp_name="outdoor-ds-${TRAIN_IMG_SIZE}-bs=$(($n_gpus_per_node * $n_nodes * $batch_size))"
