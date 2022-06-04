@@ -1,4 +1,5 @@
 import copy
+
 default_cfg = {'backbone_type': 'ResNetFPN',
                'resolution': (8, 2),
                'fine_window_size': 5,
