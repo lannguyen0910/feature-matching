@@ -1,12 +1,14 @@
 FOLDER_PATH="data"
-LOFTR_FOLDER_PATH="${FOLDER_PATH}/kornia-loftr"
-SUPERGLUE_FOLDER_PATH="${FOLDER_PATH}/super-glue-pretrained-network"
 mkdir -p ${FOLDER_PATH}
-mkdir -p ${LOFTR_FOLDER_PATH}
-mkdir -p ${SUPERGLUE_FOLDER_PATH}
 cd ${FOLDER_PATH}
+kaggle competitions download -c image-matching-challenge-2022
 kaggle datasets download -d ammarali32/kornia-loftr
 kaggle datasets download -d losveria/super-glue-pretrained-network
-unzip kornia-loftr.zip LOFTR_FOLDER_PATH
-unzip super-glue-pretrained-network.zip SUPERGLUE_FOLDER_PATH
+unzip image-matching-challenge-2022.zip -d image-matching-challenge-2022
+unzip kornia-loftr.zip -d kornia-loftr
+unzip super-glue-pretrained-network.zip -d super-glue-pretrained-network
+cp super-glue-pretrained-network/models/superglue.py LoFTR/src/loftr/utils/
+rm image-matching-challenge-2022.zip
+rm super-glue-pretrained-network.zip
+rm kornia-loftr.zip
 cd ..

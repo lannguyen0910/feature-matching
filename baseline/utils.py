@@ -1,18 +1,5 @@
-import csv
 import cv2
 import kornia as K
-
-src = '/content/data/image-matching-challenge-2022'
-
-test_samples = []
-with open(f'{src}/test.csv') as f:
-    reader = csv.reader(f, delimiter=',')
-    for i, row in enumerate(reader):
-        # Skip header.
-        if i == 0:
-            continue
-        test_samples += [row]
-
 
 def FlattenMatrix(M, num_digits=8):
     '''Convenience function to write CSV files.'''

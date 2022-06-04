@@ -1,5 +1,6 @@
 opencv_python==4.5.4.60
 kornia==0.6.4
-kornia_moons==0.1.9
 torch>=1.1.0
 numpy>=1.18.1
+einops
+yacs
