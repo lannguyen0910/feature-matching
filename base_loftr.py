@@ -1,5 +1,5 @@
-from config import ds_cfg, ot_cfg
-from utils import load_torch_image, FlattenMatrix
+from LoFTR.configs.baseline.config import ds_cfg, ot_cfg
+from LoFTR.utils.baseline.utils import load_torch_image, FlattenMatrix
 import argparse
 import csv
 import time
@@ -62,7 +62,7 @@ def main():
             f'{args.data}/test_images/{batch_id}/{image_2_id}.png', device)
 
         input_dict1 = {"image0": K.color.rgb_to_grayscale(image_1),
-                                     "image1": K.color.rgb_to_grayscale(image_2)}
+                       "image1": K.color.rgb_to_grayscale(image_2)}
         input_dict2 = copy.deepcopy(input_dict1)
 
         with torch.no_grad():
