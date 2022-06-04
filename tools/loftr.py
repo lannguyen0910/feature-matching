@@ -1,5 +1,8 @@
-from LoFTR.configs.baseline.config import ds_cfg, ot_cfg
-from LoFTR.utils.baseline.utils import load_torch_image, FlattenMatrix
+from models.LoFTR.configs.baseline.config import ds_cfg, ot_cfg
+from models.LoFTR.utils.baseline.utils import load_torch_image, FlattenMatrix
+from models.LoFTR.src.utils.plotting import make_matching_figure
+from models.LoFTR.src.loftr.loftr import LoFTR
+
 import argparse
 import csv
 import time
@@ -7,11 +10,7 @@ import numpy as np
 import cv2
 import torch
 import copy
-
 import matplotlib.cm as cm
-
-from LoFTR.src.utils.plotting import make_matching_figure
-from LoFTR.src.loftr.loftr import LoFTR
 
 from kornia_moons.feature import *
 import kornia as K
