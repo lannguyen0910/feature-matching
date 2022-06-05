@@ -28,6 +28,7 @@ parser.add_argument("--ckpt", type=str,
 
 args = parser.parse_args()
 
+DEBUG = True
 
 def main():
     def draw_img_match(img1, img2, mkpts0, mkpts1, inliers):
@@ -97,11 +98,9 @@ def main():
 
         return mkpts0, mkpts1, mconf
 
-    dry_run = True
-
     qta_max_img_size = 1056  # -1
     qta_torch_device = torch.device(
-        'cpu' if dry_run and not torch.cuda.is_available() else 'cuda')
+        'cpu' if not torch.cuda.is_available() else 'cuda')
 
     qta_device = "cuda" if torch.cuda.is_available() else "cpu"
     qta_profiler_name = None
@@ -114,6 +113,10 @@ def main():
     qta_matcher.eval()
     qta_matcher.to(qta_device)
 
+    if DEBUG == True:
+        import time
+        st = time.time()
+
     test_samples = []
     with open(f'{args.data}/test.csv') as f:
         reader = csv.reader(f, delimiter=',')
@@ -123,19 +126,12 @@ def main():
                 continue
             test_samples += [row]
 
-    if dry_run:
-        for sample in test_samples:
-            print(sample)
-
     F_dict = {}
     for i, row in enumerate(test_samples):
         sample_id, batch_id, image_1_id, image_2_id = row
 
         image_fpath_1 = f'{args.data}/test_images/{batch_id}/{image_1_id}.png'
         image_fpath_2 = f'{args.data}/test_images/{batch_id}/{image_2_id}.png'
-
-        if dry_run:
-            st = time.time()
 
         mkps1, mkps2, mconf = inf_loftr_qta(
             image_fpath_1, image_fpath_2, max_image_size=qta_max_img_size, divide_coef=32)
@@ -147,10 +143,6 @@ def main():
             F, inliers_F = cv2.findFundamentalMat(
                 mkps1, mkps2, cv2.USAC_MAGSAC, rpt_F, conf_F, m_iters_F)
 
-            if dry_run:
-                nd = time.time()
-                print("Running time: ", nd - st, " s")
-
             if F is None:
                 F_dict[sample_id] = np.zeros((3, 3))
                 continue
@@ -161,7 +153,7 @@ def main():
             F_dict[sample_id] = np.zeros((3, 3))
             continue
 
-        if dry_run and i < 3:
+        if i < 3:
             F_inliers_total = 0 if F is None else (inliers_F == 1).sum()
             print('inliers F', F_inliers_total)
 
@@ -171,10 +163,18 @@ def main():
                 image_fpath_2, qta_torch_device, -1)
             draw_img_match(orig_image_1, orig_image_2, mkps1, mkps2, inliers)
 
-        try:
-            # cleanup
-            gc.collect()
-            torch.cuda.empty_cache()
-            del mkps1, mkps2
-        except Exception:
-            pass
+        if DEBUG == True:
+            print("The number of QuadTree keypoints: ",
+                    len(mkps1))
+            print("Fundamental matrix: ")
+            print(F_dict[sample_id])
+            
+        gc.collect()
+        torch.cuda.empty_cache()
+
+    if DEBUG == True:
+        ed = time.time()
+        print(f"Total time: {ed - st:.2f}s")
+
+if __name__ == "__main__":
+    main()
