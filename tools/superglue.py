@@ -109,7 +109,6 @@ def main():
             if DEBUG == True:
                 print("The number of superglue keypoints: ",
                       len(mkpts0))
-                print("The number of all keypoints: ", len(mkpts0))
                 print("Fundamental matrix: ")
                 print(F_dict[sample_id])
 
