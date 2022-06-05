@@ -1,5 +1,5 @@
 *.zip
 *.csv
 data
-test.py
 kaggle.json
+*.ckpt
