@@ -1,6 +1,5 @@
 from models.LoFTR.configs.baseline.config import ds_cfg, ot_cfg
 from models.LoFTR.utils.baseline.utils import load_torch_image, FlattenMatrix
-from models.LoFTR.src.utils.plotting import make_matching_figure
 from models.LoFTR.src.loftr.loftr import LoFTR
 
 import argparse
@@ -10,7 +9,6 @@ import numpy as np
 import cv2
 import torch
 import copy
-import matplotlib.cm as cm
 
 from kornia_moons.feature import *
 import kornia as K
@@ -112,7 +110,8 @@ def main():
                            'tentative_color': None,
                            'feature_color': (0.2, 0.5, 1), 'vertical': False})
 
-    torch.cuda.empty_cache()
+        gc.collect()
+        torch.cuda.empty_cache()
 
     with open('submission.csv', 'w') as f:
         f.write('sample_id,fundamental_matrix\n')
