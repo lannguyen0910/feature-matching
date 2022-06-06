@@ -39,12 +39,12 @@ Architecture from: <a>https://zju3dv.github.io/loftr/</a>
 - Perform global fixed-size correlation, followed by flattening and convolution to predict correspondences. [Paper](https://arxiv.org/pdf/2202.00667.pdf)
 
 ## Result Examples
-#### LoFTR with concatenated corresponding points from dual-softmax and optimal-transport pretrained-models on outdoor scenes
+#### LoFTR with concatenated correspondence points from dual-softmax and optimal-transport pretrained-models on outdoor scenes
 <p float="left">
   <img src="assets/merge/loftr/3.jpg" width="100%" /> 
 </p>
 
-#### LoFTR with corresponding points of augmented pair images from dual-softmax pretrained-model on outdoor scenes
+#### LoFTR with correspondence points of augmented pair images from dual-softmax pretrained-model on outdoor scenes
 <p float="left">
   <img src="assets/merge/tta_loftr/3.jpg" width="100%" /> 
 </p>
